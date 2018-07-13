@@ -1,6 +1,4 @@
 (function (w) {
-    var appendChild = Element.prototype.appendChild
-    var insertBefore = Element.prototype.insertBefore
     var _events = null
     mixinEvent()
 
@@ -137,21 +135,25 @@
     }
 
     function rewriteAddDomFn () {
+        var appendChild = Element.prototype.appendChild
+        var insertBefore = Element.prototype.insertBefore
         Element.prototype.appendChild = function () {
             defineIframeEvents(arguments[0])
-            appendChild.apply(this, arguments)
+            return appendChild.apply(this, arguments)
         }
         Element.prototype.insertBefore = function () {
             defineIframeEvents(arguments[0])
-            insertBefore.apply(this, arguments)
+            return insertBefore.apply(this, arguments)
         }
     }
 
-    function defineIframeEvents (iframe) {
-        if (iframe && iframe.tagName === 'IFRAME') {
-            iframe.onload = function () {
+    function defineIframeEvents (el) {
+        var iframeEls = el && el.getElementsByTagName('iframe')
+        if (iframeEls && iframeEls.length > 0) {
+            var iframe = iframeEls[0]
+            iframe.addEventListener('load', function () {
                 defineEvents(iframe.contentWindow)
-            }
+            })
         }
     }
 
